@@ -76,7 +76,7 @@ pipeline {
         }
 
         failure {
-            sh 'docker stop $(docker ps -q) && docker rm $(docker ps -aq)'
+            sh 'docker stop addressbook && docker rm addressbook'
             echo '❌ Pipeline failed'
         }
     }
