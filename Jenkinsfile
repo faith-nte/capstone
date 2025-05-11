@@ -20,42 +20,64 @@ pipeline {
 
         stage('Launch Addressbook Base OS Container') {
             steps {
-                sh 'docker run -d -p 80:5000 addressbook'
+                sh 'docker run -d --name addressbook -p 80:5000 addressbook'
+            }
+        }
+
+        stage('Install MySQL Server in Container') {
+            steps {
+                sh '''
+                docker exec addressbook apt-get update
+                docker exec addressbook apt-get install -y mysql-server
+                docker exec addressbook service mysql start
+                '''
+            }
+        }
+
+        stage('Set MySQL Root Password') {
+            steps {
+                sh '''
+                docker exec addressbook sh -c "mysql -u root <<EOF
+                ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'yourpassword';
+                FLUSH PRIVILEGES;
+                EOF"
+                '''
             }
         }
 
         stage('Create SQL Database') {
             steps {
-                // Replace with secured password method if needed
-                sh 'mysql -u root -prootpassword < schema.sql'
+                sh '''
+                docker cp schema.sql addressbook:/tmp/schema.sql
+                docker exec addressbook mysql -u root -pyourpassword < /tmp/schema.sql
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh """
-                    source ${VENV}/bin/activate || true
-                    pytest || true
-                """
+                sh '''
+                docker exec addressbook sh -c "source ${VENV}/bin/activate && pytest || true"
+                '''
             }
         }
 
         stage('Run Python App') {
             steps {
-                sh """
-                    source ${VENV}/bin/activate || true
-                    python run.py
-                """
+                sh '''
+                docker exec addressbook sh -c "source ${VENV}/bin/activate && python run.py"
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline executed successfully'
+            echo '✅ Pipeline executed successfully'
         }
+
         failure {
-            echo 'Pipeline failed'
+            echo '❌ Pipeline failed'
         }
     }
 }
