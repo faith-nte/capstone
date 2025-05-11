@@ -24,52 +24,6 @@ pipeline {
             }
         }
 
-        stage('Install MySQL Server in Container') {
-            steps {
-                sh '''
-                docker exec addressbook apt install mysql-server -y
-                docker exec addressbook service mysql start
-                '''
-            }
-        }
-
-        stage('Set MySQL Root Password') {
-            steps {
-                sh '''
-                docker exec addressbook sh -c "mysql -u root <<EOF
-                ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'yourpassword';
-                FLUSH PRIVILEGES;
-                EOF"
-                '''
-            }
-        }
-
-        stage('Create SQL Database') {
-            steps {
-                sh '''
-                docker cp schema.sql addressbook:/tmp/schema.sql
-                docker exec addressbook mysql -u root -pyourpassword < /tmp/schema.sql
-                '''
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh '''
-                docker exec addressbook sh -c "source ${VENV}/bin/activate && pytest || true"
-                '''
-            }
-        }
-
-        stage('Run Python App') {
-            steps {
-                sh '''
-                docker exec addressbook sh -c "source ${VENV}/bin/activate && python run.py"
-                '''
-            }
-        }
-    }
-
     post {
         success {
             echo '✅ Pipeline executed successfully'
