@@ -4,6 +4,7 @@ pipeline {
     environment {
         VENV = '.venv'
     }
+}
 
     stages {
         stage('Clone Repository') {
