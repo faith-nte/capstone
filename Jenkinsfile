@@ -20,15 +20,15 @@ pipeline {
 
         stage('Launch Addressbook Base OS Container') {
             steps {
-                sh 'docker run -d --name addressbooks -p 81:5000 addressbook'
+                sh 'docker run -d --name addressbook -p 80:5000 addressbook'
             }
         }
 
         stage('Install MySQL Server in Container') {
             steps {
                 sh '''
-                docker exec addressbooks sudo apt install mysql-server -y
-                docker exec addressbooks service mysql start
+                docker exec addressbook sudo apt install mysql-server -y
+                docker exec addressbook service mysql start
                 '''
             }
         }
@@ -36,7 +36,7 @@ pipeline {
         stage('Set MySQL Root Password') {
             steps {
                 sh '''
-                docker exec addressbooks sh -c "mysql -u root <<EOF
+                docker exec addressbook sh -c "mysql -u root <<EOF
                 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'yourpassword';
                 FLUSH PRIVILEGES;
                 EOF"
@@ -47,8 +47,8 @@ pipeline {
         stage('Create SQL Database') {
             steps {
                 sh '''
-                docker cp schema.sql addressbooks:/tmp/schema.sql
-                docker exec addressbooks mysql -u root -pyourpassword < /tmp/schema.sql
+                docker cp schema.sql addressbook:/tmp/schema.sql
+                docker exec addressbook mysql -u root -pyourpassword < /tmp/schema.sql
                 '''
             }
         }
@@ -56,7 +56,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                docker exec addressbooks sh -c "source ${VENV}/bin/activate && pytest || true"
+                docker exec addressbook sh -c "source ${VENV}/bin/activate && pytest || true"
                 '''
             }
         }
@@ -64,7 +64,7 @@ pipeline {
         stage('Run Python App') {
             steps {
                 sh '''
-                docker exec addressbooks sh -c "source ${VENV}/bin/activate && python run.py"
+                docker exec addressbook sh -c "source ${VENV}/bin/activate && python run.py"
                 '''
             }
         }
@@ -76,6 +76,7 @@ pipeline {
         }
 
         failure {
+            sh 'docker stop $(docker ps -q) && docker rm $(docker ps -aq)'
             echo '❌ Pipeline failed'
         }
     }
