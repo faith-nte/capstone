@@ -20,7 +20,6 @@ pipeline {
 
         stage('Launch Addressbook Base OS Container') {
             steps {
-                sh 'docker stop $(docker ps -q) && docker rm $(docker ps -aq)'
                 sh 'docker run -d --name addressbooks -p 81:5000 addressbook'
             }
         }
