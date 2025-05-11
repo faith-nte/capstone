@@ -4,7 +4,6 @@ pipeline {
     environment {
         VENV = '.venv'
     }
-}
 
     stages {
         stage('Clone Repository') {
@@ -24,6 +23,7 @@ pipeline {
                 sh 'docker run -d --name addressbook -p 80:5000 addressbook'
             }
         }
+    }
 
     post {
         success {
@@ -31,7 +31,10 @@ pipeline {
         }
 
         failure {
-            sh 'docker stop addressbook && docker rm addressbook'
+            script {
+                sh 'docker stop addressbook || true'
+                sh 'docker rm addressbook || true'
+            }
             echo '❌ Pipeline failed'
         }
     }
