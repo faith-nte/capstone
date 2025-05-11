@@ -28,7 +28,7 @@ pipeline {
         stage('Install MySQL Server in Container') {
             steps {
                 sh '''
-                docker exec addressbooks apt-get install -y mysql-server
+                docker exec addressbooks sudo apt install mysql-server -y
                 docker exec addressbooks service mysql start
                 '''
             }
