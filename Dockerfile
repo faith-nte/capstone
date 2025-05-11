@@ -6,10 +6,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update and install system dependencies
 RUN apt-get update && apt-get install -y \
+    mysql-server \
+    mysql-client \
+    libmysqlclient-dev \
     python3 \
     python3-pip \
     python3-venv \
-    mysql-server \
     default-libmysqlclient-dev \
     build-essential \
     curl \
