@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         VENV = '.venv'
-        DOCKER_IMAGE = 'ibrocold/addressbook:latest'
     }
 
     stages {
@@ -28,11 +27,17 @@ pipeline {
         stage('Push Addressbook Running App Image to Docker Hub') {
             steps {
                 script {
+                    // Commit the running container to a new image
                     sh 'docker commit addressbook addressbook-snapshot'
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        sh "docker tag addressbook-snapshot ${DOCKER_IMAGE}"
-                        sh "docker push ${DOCKER_IMAGE}"
-                    }
+                    // Push to Docker Hub with authentication
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                    def image = docker.image('ibrocold/addressbook')
+                    // Tag the local snapshot image
+                    sh 'docker tag addressbook-snapshot ibrocold/addressbook:latest'
+                    // Push the image
+                    image.push('latest')
+    }
+}
                 }
             }
         }
