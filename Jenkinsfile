@@ -14,13 +14,13 @@ pipeline {
 
         stage('Build Addressbook BaseOS Image') {
             steps {
-                sh 'docker build -t addressbook .'
+                sh 'docker build -t addressbook . || true'
             }
         }
 
         stage('Launch Addressbook Base OS Container') {
             steps {
-                sh 'docker run -d --name addressbook -p 8085:5000 addressbook || true'
+                sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
             }
         }
     }
