@@ -9,8 +9,5 @@ until mysqladmin ping --silent; do
     sleep 2
 done
 
-# create database
-mysql -u root < /app/schema.sql
-
-# Start your Python app
-exec python3 app/run.py
+source venv/bin/activate   # ✅ Activates the virtual environment
+python3 run.py             # ✅ Runs the app using the Python interpreter and packages from that virtual environment
