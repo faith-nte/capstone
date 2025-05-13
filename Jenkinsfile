@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VENV = '.venv'
-        DOCKER_IMAGE = 'ibrocold/addressbook-snapshot:latest'
+        DOCKER_IMAGE = 'ibrocold/addressbook:latest'
     }
 
     stages {
