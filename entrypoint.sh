@@ -10,4 +10,4 @@ until mysqladmin ping --silent; do
 done
 
 source venv/bin/activate   # ✅ Activates the virtual environment
-python3 run.py  # ✅ Runs the app in the background and keeps it open
+nohup python3 run.py > app.log 2>&1 &  # ✅ Runs the app in the background and keeps it open
