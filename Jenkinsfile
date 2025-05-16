@@ -13,6 +13,15 @@ pipeline {
             }
         }
 
+        stage('Launch Prometheus and Grafana') {
+            steps {
+                script {
+                    echo '🚀 Launching Prometheus and Grafana...'
+                    sh 'docker-compose -f docker-compose.yml up -d'
+                }
+            }   
+        }
+
         stage('Build Addressbook BaseOS Image') {
             steps {
                 sh 'docker build -t addressbook . || true'
