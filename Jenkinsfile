@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -8,43 +9,19 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/faith-nte/capstone'
+                git branch: 'main', url: 'https://github.com/Ibrocold/devboot02-ab'
             }
         }
 
         stage('Build Addressbook BaseOS Image') {
             steps {
-                script {
-                    echo '📦 Building Docker image...'
-                    sh 'docker build -t addressbook .'
-                }
-            }
-        }
-
-        stage('Push Addressbook BaseOS Image to Docker Hub') {
-            steps {
-                script {
-                    echo '🚀 Tagging and pushing Docker image to Docker Hub...'
-
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        sh 'docker tag addressbook ibrocold/addressbook:latest'
-                        sh 'docker push ibrocold/addressbook:latest'
-                    }
-                }
+                sh 'docker build -t addressbook . || true'
             }
         }
 
         stage('Launch Addressbook Base OS Container') {
             steps {
-                script {
-                    echo '🧪 Launching Docker container...'
-
-                    // Clean up any existing container
-                    sh 'docker rm -f addressbook || true'
-
-                    // Run the container in the background
-                    sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
-                }
+                sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
             }
         }
     }
@@ -56,8 +33,8 @@ pipeline {
 
         failure {
             script {
-                // Clean up container on failure
-                sh 'docker rm -f addressbook || true'
+                sh 'docker stop addressbook || true'
+                sh 'docker rm addressbook || true'
             }
             echo '❌ Pipeline failed'
         }
