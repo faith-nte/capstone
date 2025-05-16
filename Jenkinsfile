@@ -1,4 +1,5 @@
 
+
 pipeline {
     agent any
 
@@ -11,15 +12,6 @@ pipeline {
             steps {
                 git branch: 'main', url: 'https://github.com/faith-nte/capstone'
             }
-        }
-
-        stage('Launch Prometheus and Grafana') {
-            steps {
-                script {
-                    echo '🚀 Launching Prometheus and Grafana...'
-                    sh 'docker-compose -f docker-compose.yml up -d'
-                }
-            }   
         }
 
         stage('Build Addressbook BaseOS Image') {
@@ -46,6 +38,15 @@ pipeline {
                 sh 'docker rm -f addressbook || true'
                 sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
             }
+        }
+
+        stage('Launch Prometheus and Grafana') {
+            steps {
+                script {
+                    echo '🚀 Launching Prometheus and Grafana...'
+                    sh 'docker-compose -f docker-compose.yml up -d'
+                }
+            }   
         }
     }
 
