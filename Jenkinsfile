@@ -33,13 +33,6 @@ pipeline {
             }
         }
 
-        stage('Launch Addressbook Base OS Container') {
-            steps {
-                sh 'docker rm -f addressbook || true'
-                sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
-            }
-        }
-
         stage('Launch Prometheus and Grafana') {
             steps {
                 script {
@@ -47,6 +40,14 @@ pipeline {
                     sh 'docker-compose -f docker-compose.yml up -d'
                 }
             }   
+        }
+
+        stage('Launch Addressbook Base OS Container') {
+            steps {
+                sh 'docker rm -f addressbook || true'
+                sh 'docker run -d --name addressbook --network address_monitor-net -p 8085:5000 addressbook'
+
+            }
         }
     }
 
