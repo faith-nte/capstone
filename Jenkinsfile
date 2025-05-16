@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     echo '🚀 Launching Prometheus and Grafana...'
-                    sh 'docker-compose -f docker-compose.yml up -d'
+                    sh 'docker exec addressbook docker-compose -f docker-compose.yml up -d'
                 }
             }   
         }
