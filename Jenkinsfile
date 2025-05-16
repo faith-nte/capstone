@@ -19,6 +19,19 @@ pipeline {
             }
         }
 
+        stage('Push Addressbook BaseOS Image to Docker Hub') {
+            steps {
+                script {
+                    echo '🚀 Tagging and pushing Docker image to Docker Hub...'
+
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        sh 'docker tag addressbook ibrocold/addressbook:latest'
+                        sh 'docker push ibrocold/addressbook:latest'
+                    }
+                }
+            }
+        }
+
         stage('Launch Addressbook Base OS Container') {
             steps {
                 sh 'docker rm -f addressbook || true'
