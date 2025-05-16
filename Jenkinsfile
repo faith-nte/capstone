@@ -15,8 +15,21 @@ pipeline {
         stage('Build Addressbook BaseOS Image') {
             steps {
                 script {
-                    // Build the Docker image, and fail the pipeline if it doesn't build
+                    echo '📦 Building Docker image...'
                     sh 'docker build -t addressbook .'
+                }
+            }
+        }
+
+        stage('Push Addressbook BaseOS Image to Docker Hub') {
+            steps {
+                script {
+                    echo '🚀 Tagging and pushing Docker image to Docker Hub...'
+
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                        sh 'docker tag addressbook ibrocold/addressbook:latest'
+                        sh 'docker push ibrocold/addressbook:latest'
+                    }
                 }
             }
         }
@@ -24,10 +37,12 @@ pipeline {
         stage('Launch Addressbook Base OS Container') {
             steps {
                 script {
-                    // Stop any running container with the same name to avoid conflict
+                    echo '🧪 Launching Docker container...'
+
+                    // Clean up any existing container
                     sh 'docker rm -f addressbook || true'
 
-                    // Run the container
+                    // Run the container in the background
                     sh 'docker run -d --name addressbook -p 8085:5000 addressbook'
                 }
             }
@@ -41,7 +56,7 @@ pipeline {
 
         failure {
             script {
-                // Ensure container is cleaned up on failure
+                // Clean up container on failure
                 sh 'docker rm -f addressbook || true'
             }
             echo '❌ Pipeline failed'
