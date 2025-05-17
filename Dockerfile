@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
-    docker.io \
     && apt-get clean
 
 WORKDIR /app
