@@ -15,7 +15,7 @@ pipeline {
         stage('Start Docker') {
             steps {
                 sh 'newgrp docker'
-                sh 'service start docker'
+                sh 'service docker start'
             }
         }
         
