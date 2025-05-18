@@ -36,6 +36,7 @@ pipeline {
             steps {
                 script {
                     echo '🚀 Launching Prometheus and Grafana...'
+                    sh 'docker rm -f prometheus grafana || true'
                     sh 'docker-compose -f docker-compose.yml up -d'
                 }
             }
