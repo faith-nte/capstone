@@ -44,7 +44,7 @@ pipeline {
         stage('Launch Addressbook Base OS Container') {
             steps {
                 sh 'docker rm -f addressbook || true'
-                sh 'docker run -d --name addressbook --network adrdressbook_monitor-net -p 8085:5000 addressbook'
+                sh 'docker run -d --name addressbook --network addressbook_monitor-net -p 8085:5000 addressbook'
             }
         }
     }
