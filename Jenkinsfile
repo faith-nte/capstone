@@ -11,13 +11,6 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/faith-nte/capstone'
             }
         }
-
-        stage('Start Docker') {
-            steps {
-                sh 'newgrp docker'
-                sh 'service docker start'
-            }
-        }
         
         stage('Build Addressbook BaseOS Image') {
             steps {
