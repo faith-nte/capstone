@@ -1,5 +1,3 @@
-
-
 pipeline {
     agent any
 
@@ -25,7 +23,8 @@ pipeline {
                 script {
                     echo '🚀 Tagging and pushing Docker image to Docker Hub...'
 
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                         sh 'docker tag addressbook ibrocold/addressbook:latest'
                         sh 'docker push ibrocold/addressbook:latest'
                     }
@@ -39,14 +38,13 @@ pipeline {
                     echo '🚀 Launching Prometheus and Grafana...'
                     sh 'docker-compose -f docker-compose.yml up -d'
                 }
-            }   
+            }
         }
 
         stage('Launch Addressbook Base OS Container') {
             steps {
                 sh 'docker rm -f addressbook || true'
                 sh 'docker run -d --name addressbook --network address_monitor-net -p 8085:5000 addressbook'
-
             }
         }
     }
