@@ -14,7 +14,6 @@ pipeline {
 
         stage('Start Docker') {
             steps {
-                sh 'usermod -aG docker jenkins'
                 sh 'newgrp docker'
                 sh 'service start docker'
             }
