@@ -4,6 +4,9 @@ pipeline {
     environment {
         VENV = '.venv'
     }
+    triggers {
+        pollSCM('H/5 * * * *') // Poll changes to Repo every 5mins
+    }
 
     stages {
         stage('Clone Repository') {
