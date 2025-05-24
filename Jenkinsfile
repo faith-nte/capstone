@@ -28,8 +28,8 @@ pipeline {
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                        sh 'docker tag addressbook ibrocold/addressbook:latest'
-                        sh 'docker push ibrocold/addressbook:latest'
+                        sh 'docker tag addressbook ibrofaith/addressbook:latest'
+                        sh 'docker push ibrofaith/addressbook:latest'
                     }
                 }
             }
