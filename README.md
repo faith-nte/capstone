@@ -39,44 +39,161 @@ address-book-python/
 
 ```
 
-## Detailed Steps:
-1. **Install MySQL database to your machine**:
- - Install Python to your machine
- - Download and install mysql using the following credentials: 
-   root/Pa55word
+Here is your content rewritten as a clear and well-structured README file:
 
-```bash
-$ python3
-Python 3.11.1 (v3.11.1:a7a450f84a, Dec  6 2022, 15:24:06) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
-Type "help", "copyright", "credits" or "license" for more information.
->>> exit()
+---
+
+# AddressBook App CI/CD Pipeline
+
+This pipeline automates the **build, deployment, logging, and monitoring** of a Python Flask AddressBook application running in a Docker container. It uses Jenkins for automation and incorporates Prometheus and Grafana for monitoring.
+
+## Prerequisites
+
+- **Docker** must be installed on the host machine.
+- **Docker Hub** credentials are required (to push the app image).
+- [Optional] **Docker Compose** if you wish to extend beyond this guide.
+
+---
+
+## Step-by-Step Setup
+
+### 1. Build Jenkins Docker Image
+
+Create a Jenkins image with Docker and Docker Compose installed, and expose the necessary ports:
+
+- **9090:** Prometheus
+- **3000:** Grafana
+- **8085:** Flask App
+
+#### Create `Dockerfile.jenkins`:
+
+```Dockerfile
+FROM jenkins/jenkins:lts
+USER root
+RUN apt-get update && \
+    apt-get install -y docker.io && \
+    apt-get install -y docker-compose
+EXPOSE 8085 3000 9090
+USER jenkins
 ```
 
-2. **Create the database**:
+#### Build the Docker Image:
+
 ```bash
-$ mysql -u root -p < schema.sql
-```
-Subsequently, you only need to ensure that the mysql service is up and running.
-
-3. **Run the App**:
-```bash
-# Ensure you are in the project root folder
-cd devboot02-ab
-
-# Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows use venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the Flask App
-python run.py
+docker build -t jenkins-with-docker -f Dockerfile.jenkins .
 ```
 
-Your Address Book app should now be accessible at `http://127.0.0.1:5000`, with a navigation bar to add and view contacts!
+---
 
-Type "exit" to quit the python development server
+### 2. Run the Jenkins Container
+
+Start the new Jenkins container with Docker privileges and map the required ports:
+
 ```bash
+docker run -it --privileged -d --name jenkins-new \
+  -p 8080:8080 -p 8085:8085 -p 3000:3000 -p 9090:9090 jenkins-with-docker
+```
+
+---
+
+### 3. Grant Jenkins User Docker Access
+
+Connect to the container as root and add the Jenkins user to the Docker group:
+
+```bash
+docker exec -it --user root jenkins-new bash
+usermod -aG docker jenkins
+newgrp docker
 exit
 ```
+
+---
+
+### 4. Restart the Jenkins Container
+
+Restart the container so the group permissions take effect:
+
+```bash
+docker restart jenkins-new
+```
+
+---
+
+### 5. Start Docker Service in Container
+
+Start Docker in the container (run these as root):
+
+```bash
+docker exec -it --user root jenkins-new bash
+service docker start
+exit
+```
+
+---
+
+### 6. Access Jenkins UI
+
+Visit [http://localhost:8080](http://localhost:8080) on your host machine to access Jenkins.
+
+---
+
+### 7. Get Jenkins Initial Admin Password
+
+Retrieve the Jenkins setup password:
+
+```bash
+docker exec jenkins-new cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+Use this password to unlock Jenkins in your browser and follow the setup wizard.
+
+---
+
+### 8. Set Up Jenkins DockerHub Credentials
+
+- In Jenkins: go to **Manage Jenkins > Manage Credentials**
+- Add a new credential:
+    - **ID:** `dockerhub-credentials`
+    - **Username:** Your DockerHub username
+    - **Password:** Your DockerHub password
+
+---
+
+### 9. Create and Configure Jenkins Pipeline
+
+- Go to Jenkins and create a new build item:
+  - **Name:** Addressbook
+  - **Type:** Pipeline
+- Configure pipeline:
+  - **Build Triggers:** GitHub hook trigger for GITScm polling
+  - **Pipeline Definition:** Pipeline script from SCM
+  - **SCM Type:** Git
+  - **Repository URL:** `https://github.com/faith-nte/capstone`
+  - **Branch Specifier:** `main`
+  - **Script Path:** `Jenkinsfile`
+- Save the configuration
+
+---
+
+### 10. Build the Project
+
+Click **"Build Now"** in Jenkins to start your pipeline.
+
+---
+
+### 11. Access Services
+
+- **Flask App:** [http://localhost:8085](http://localhost:8085)
+- **Prometheus:** [http://localhost:9090](http://localhost:9090)
+- **Grafana:** [http://localhost:3000](http://localhost:3000)
+- **DockerHub:** The application image will be available in your DockerHub repository.
+
+---
+
+## Summary
+
+This README describes how to set up a full CI/CD pipeline for your Flask AddressBook app, with monitoring and automated deployment. For troubleshooting or extensions, refer to the individual tool documentation or the repository’s Issues section.
+
+---
+
+**Happy Building!**
