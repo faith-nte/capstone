@@ -40,3 +40,4 @@ volumes:
 networks:
   monitor-net:
     driver: bridge
+    name: monitor-net # Explicitly set the network name
