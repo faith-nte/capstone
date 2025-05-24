@@ -33,9 +33,17 @@ address-book-python/
 │
 ├── venv/                       # Virtual environment folder
 ├── .env                        # Environment variables (e.g., DB password)
+├── Dockerfile                  # To Build the docker image of the Flask app with SQL
+├── Dockerfile.jenkins          # To build the docker image of the Jenkins server for automating pipeline
+├── Jenkinsfile                 # Contains the script for Jenkins pipeline
+├── docker-compose.yml          # Contains instructions to run Prometheus, Grafana and define their docker network
+├── entrypoint.sh               # Contains script to start mysql service, activate python venv and run the app
+├── mysql_setup.sh              # Script to install mysql, configure and change root password from default
+├── prometheus.yml              # Configure the parameters and scraping information for Prometheus
 ├── requirements.txt            # Dependencies for the project
 ├── run.py                      # Main entry point to run the Flask app
 └── schema.sql                  # SQL script for creating the database and tables
+
 
 ---
 
