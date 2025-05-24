@@ -1,20 +1,19 @@
-# Mini Address Book App - Fullstack App
-Python(Flask) + HTML/CSS + MySQL
+# Mini Address Book App - Fullstack App  
+Python (Flask) + HTML/CSS + MySQL
 
 ## Overview
 
-This is a simple address book application. 
+This is a simple address book application.
 
- - **Frontend:** HTML with Bootstrap
- - **Backend:** Flask
- - **Database:** MySQL
- - **ORM:** SQLAlchemy
- - **Envvironemnt Variables/Sensitive Data:** dotenv
-
+- **Frontend:** HTML with Bootstrap  
+- **Backend:** Flask  
+- **Database:** MySQL  
+- **ORM:** SQLAlchemy  
+- **Environment Variables/Sensitive Data:** dotenv
 
 ## Project Structure
 
-Here’s the folder structure for the app:
+The folder structure for the app is as follows:
 
 ```
 address-book-python/
@@ -33,44 +32,44 @@ address-book-python/
 │
 ├── venv/                       # Virtual environment folder
 ├── .env                        # Environment variables (e.g., DB password)
-├── Dockerfile                  # To Build the docker image of the Flask app with SQL
-├── Dockerfile.jenkins          # To build the docker image of the Jenkins server for automating pipeline
+├── Dockerfile                  # To build the Docker image of the Flask app with SQL
+├── Dockerfile.jenkins          # To build the Docker image of the Jenkins server for automating pipeline
 ├── Jenkinsfile                 # Contains the script for Jenkins pipeline
 ├── docker-compose.yml          # Contains instructions to run Prometheus, Grafana and define their docker network
-├── entrypoint.sh               # Contains script to start mysql service, activate python venv and run the app
-├── mysql_setup.sh              # Script to install mysql, configure and change root password from default
+├── entrypoint.sh               # Script to start MySQL service, activate Python venv, and run the app
+├── mysql_setup.sh              # Script to install MySQL, configure and change root password from default
 ├── prometheus.yml              # Configure the parameters and scraping information for Prometheus
 ├── requirements.txt            # Dependencies for the project
 ├── run.py                      # Main entry point to run the Flask app
 └── schema.sql                  # SQL script for creating the database and tables
-
+```
 
 ---
 
-# AddressBook App CI/CD Pipeline
+# CI/CD Pipeline & Monitoring Setup
 
-This pipeline automates the **build, deployment, logging, and monitoring** of a Python Flask AddressBook application running in a Docker container. It uses Jenkins for automation and incorporates Prometheus and Grafana for monitoring.
+This section provides the step-by-step process for automating the build, deployment, logging, and monitoring of the Address Book app using Jenkins, Docker, Prometheus, and Grafana.
+
+---
 
 ## Prerequisites
 
-- **Docker** must be installed on the host machine.
-- **Docker Hub** credentials are required (to push the app image).
-- [Optional] **Docker Compose** if you wish to extend beyond this guide.
+- Docker must be installed on the host machine.
+- Docker Hub credentials (to push the app image).
+- [Optional] Docker Compose if you wish to extend beyond this guide.
 
 ---
 
-## Step-by-Step Setup
+## Step-by-Step Process
 
 ### 1. Build Jenkins Docker Image
 
-Create a Jenkins image with Docker and Docker Compose installed, and expose the necessary ports:
+Create a Jenkins image with Docker and Docker Compose installed. Expose the following ports:  
+- **9090**: Prometheus  
+- **3000**: Grafana  
+- **8085**: Flask App
 
-- **9090:** Prometheus
-- **3000:** Grafana
-- **8085:** Flask App
-
-#### Create `Dockerfile.jenkins`:
-
+**Create `Dockerfile.jenkins`:**
 ```Dockerfile
 FROM jenkins/jenkins:lts
 USER root
@@ -81,9 +80,8 @@ EXPOSE 8085 3000 9090
 USER jenkins
 ```
 
-#### Build the Docker Image:
-
-```bash
+**Build the Docker image:**
+```sh
 docker build -t jenkins-with-docker -f Dockerfile.jenkins .
 ```
 
@@ -91,9 +89,8 @@ docker build -t jenkins-with-docker -f Dockerfile.jenkins .
 
 ### 2. Run the Jenkins Container
 
-Start the new Jenkins container with Docker privileges and map the required ports:
-
-```bash
+Run the Docker container with Jenkins and map the required ports:
+```sh
 docker run -it --privileged -d --name jenkins-new \
   -p 8080:8080 -p 8085:8085 -p 3000:3000 -p 9090:9090 jenkins-with-docker
 ```
@@ -102,9 +99,8 @@ docker run -it --privileged -d --name jenkins-new \
 
 ### 3. Grant Jenkins User Docker Access
 
-Connect to the container as root and add the Jenkins user to the Docker group:
-
-```bash
+Connect to the container as root and add Jenkins user to the Docker group:
+```sh
 docker exec -it --user root jenkins-new bash
 usermod -aG docker jenkins
 newgrp docker
@@ -115,19 +111,17 @@ exit
 
 ### 4. Restart the Jenkins Container
 
-Restart the container so the group permissions take effect:
-
-```bash
+Restart the container to apply group changes:
+```sh
 docker restart jenkins-new
 ```
 
 ---
 
-### 5. Start Docker Service in Container
+### 5. Start Docker Service in the Container
 
-Start Docker in the container (run these as root):
-
-```bash
+Start Docker inside the Jenkins container:
+```sh
 docker exec -it --user root jenkins-new bash
 service docker start
 exit
@@ -137,19 +131,17 @@ exit
 
 ### 6. Access Jenkins UI
 
-Visit [http://localhost:8080](http://localhost:8080) on your host machine to access Jenkins.
+Open Jenkins in your browser at [http://localhost:8080](http://localhost:8080).
 
 ---
 
 ### 7. Get Jenkins Initial Admin Password
 
 Retrieve the Jenkins setup password:
-
-```bash
+```sh
 docker exec jenkins-new cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-
-Use this password to unlock Jenkins in your browser and follow the setup wizard.
+Use this password in your browser to complete Jenkins setup.
 
 ---
 
@@ -157,47 +149,45 @@ Use this password to unlock Jenkins in your browser and follow the setup wizard.
 
 - In Jenkins: go to **Manage Jenkins > Manage Credentials**
 - Add a new credential:
-    - **ID:** `dockerhub-credentials`
-    - **Username:** Your DockerHub username
-    - **Password:** Your DockerHub password
+  - **ID:** `dockerhub-credentials`
+  - **Username:** Your DockerHub username
+  - **Password:** Your DockerHub password
 
 ---
 
 ### 9. Create and Configure Jenkins Pipeline
 
-- Go to Jenkins and create a new build item:
+- In Jenkins, create a new build item:
   - **Name:** Addressbook
   - **Type:** Pipeline
-- Configure pipeline:
+
+- Configure the pipeline:
   - **Build Triggers:** GitHub hook trigger for GITScm polling
   - **Pipeline Definition:** Pipeline script from SCM
   - **SCM Type:** Git
   - **Repository URL:** `https://github.com/faith-nte/capstone`
   - **Branch Specifier:** `main`
   - **Script Path:** `Jenkinsfile`
-- Save the configuration
 
 ---
 
 ### 10. Build the Project
 
-Click **"Build Now"** in Jenkins to start your pipeline.
+Click **"Build Now"** in Jenkins to trigger your pipeline.
 
 ---
 
-### 11. Access Services
+### 11. Access Your Services
 
 - **Flask App:** [http://localhost:8085](http://localhost:8085)
 - **Prometheus:** [http://localhost:9090](http://localhost:9090)
 - **Grafana:** [http://localhost:3000](http://localhost:3000)
-- **DockerHub:** The application image will be available in your DockerHub repository.
+- **DockerHub:** Find the application image in your DockerHub repo.
 
 ---
 
-## Summary
-
-This README describes how to set up a full CI/CD pipeline for your Flask AddressBook app, with monitoring and automated deployment. For troubleshooting or extensions, refer to the individual tool documentation or the repository’s Issues section.
+**For troubleshooting or more details, see the documentation for each tool or raise an issue in this repo.**
 
 ---
 
-**Happy Building!**
+Happy Building!
