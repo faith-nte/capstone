@@ -37,10 +37,6 @@ address-book-python/
 ├── run.py                      # Main entry point to run the Flask app
 └── schema.sql                  # SQL script for creating the database and tables
 
-```
-
-Here is your content rewritten as a clear and well-structured README file:
-
 ---
 
 # AddressBook App CI/CD Pipeline
