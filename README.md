@@ -1,14 +1,15 @@
-# Mini Address Book App - Fullstack App  
+# Mini Address Book App - Fullstack App
+
 Python (Flask) + HTML/CSS + MySQL
 
 ## Overview
 
 This is a simple address book application.
 
-- **Frontend:** HTML with Bootstrap  
-- **Backend:** Flask  
-- **Database:** MySQL  
-- **ORM:** SQLAlchemy  
+- **Frontend:** HTML with Bootstrap
+- **Backend:** Flask
+- **Database:** MySQL
+- **ORM:** SQLAlchemy
 - **Environment Variables/Sensitive Data:** dotenv
 
 ## Project Structure
@@ -64,12 +65,14 @@ This section provides the step-by-step process for automating the build, deploym
 
 ### 1. Build Jenkins Docker Image
 
-Create a Jenkins image with Docker and Docker Compose installed. Expose the following ports:  
-- **9090**: Prometheus  
-- **3000**: Grafana  
+Create a Jenkins image with Docker and Docker Compose installed. Expose the following ports:
+
+- **9090**: Prometheus
+- **3000**: Grafana
 - **8085**: Flask App
 
 **Create `Dockerfile.jenkins`:**
+
 ```Dockerfile
 FROM jenkins/jenkins:lts
 USER root
@@ -81,6 +84,7 @@ USER jenkins
 ```
 
 **Build the Docker image:**
+
 ```sh
 docker build -t jenkins-with-docker -f Dockerfile.jenkins .
 ```
@@ -90,6 +94,7 @@ docker build -t jenkins-with-docker -f Dockerfile.jenkins .
 ### 2. Run the Jenkins Container
 
 Run the Docker container with Jenkins and map the required ports:
+
 ```sh
 docker run -it --privileged -d --name jenkins-new \
   -p 8080:8080 -p 8085:8085 -p 3000:3000 -p 9090:9090 jenkins-with-docker
@@ -100,6 +105,7 @@ docker run -it --privileged -d --name jenkins-new \
 ### 3. Grant Jenkins User Docker Access
 
 Connect to the container as root and add Jenkins user to the Docker group:
+
 ```sh
 docker exec -it --user root jenkins-new bash
 usermod -aG docker jenkins
@@ -112,6 +118,7 @@ exit
 ### 4. Restart the Jenkins Container
 
 Restart the container to apply group changes:
+
 ```sh
 docker restart jenkins-new
 ```
@@ -121,6 +128,7 @@ docker restart jenkins-new
 ### 5. Start Docker Service in the Container
 
 Start Docker inside the Jenkins container:
+
 ```sh
 docker exec -it --user root jenkins-new bash
 service docker start
@@ -138,9 +146,11 @@ Open Jenkins in your browser at [http://localhost:8080](http://localhost:8080).
 ### 7. Get Jenkins Initial Admin Password
 
 Retrieve the Jenkins setup password:
+
 ```sh
 docker exec jenkins-new cat /var/jenkins_home/secrets/initialAdminPassword
 ```
+
 Use this password in your browser to complete Jenkins setup.
 
 ---
@@ -160,6 +170,7 @@ Use this password in your browser to complete Jenkins setup.
 ### 9. Create and Configure Jenkins Pipeline
 
 - In Jenkins, create a new build item:
+
   - **Name:** Addressbook
   - **Type:** Pipeline
 
@@ -189,6 +200,10 @@ Click **"Build Now"** in Jenkins to trigger your pipeline.
 ---
 
 **For troubleshooting or more details, see the documentation for each tool or raise an issue in this repo.**
+
+---
+
+//### 12. Upcoming - Expose localhost with ngrok
 
 ---
 
