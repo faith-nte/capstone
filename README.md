@@ -1,79 +1,68 @@
-# Mini Address Book App - Fullstack App
+# 📒 Mini Address Book App (Fullstack)
 
-Python (Flask) + HTML/CSS + MySQL
+A simple app to save and show addresses.
 
-## Overview
+### 🛠️ Tech Stack
 
-This is a simple address book application.
+- **Frontend:** HTML + Bootstrap
+- **Backend:** Flask (Python)
+- **Database:** MySQL + SQLAlchemy
+- **Secrets:** Stored with `.env`
 
-- **Frontend:** HTML with Bootstrap
-- **Backend:** Flask
-- **Database:** MySQL
-- **ORM:** SQLAlchemy
-- **Environment Variables/Sensitive Data:** dotenv
+---
 
-## Project Structure
+## 📁 Project Folder Structure
 
-The folder structure for the app is as follows:
-
-```
 address-book-python/
 │
 ├── app/
-│   ├── __init__.py             # Flask app and configuration setup
-│   ├── config.py               # Configuration file (DB details, hidden using .env)
-│   ├── models.py               # Database schema
-│   ├── routes.py               # Routes for input and display pages
-│   ├── templates/              # HTML templates for the app
-│   │   ├── base.html           # Base template with navigation bar
-│   │   ├── form.html           # Input form template
-│   │   └── display.html        # Display template for submitted data
-│   ├── static/                 # Static files (e.g., CSS)
-│   │   └── style.css           # Custom styles for the app
+│ ├── init.py # Flask app setup
+│ ├── config.py # App settings (like DB info)
+│ ├── models.py # Database tables
+│ ├── routes.py # Page routes
+│ ├── templates/
+│ │ ├── base.html # Main layout
+│ │ ├── form.html # Add address form
+│ │ └── display.html # Show saved addresses
+│ ├── static/
+│ │ └── style.css # Custom styles
 │
-├── venv/                       # Virtual environment folder
-├── .env                        # Environment variables (e.g., DB password)
-├── Dockerfile                  # To build the Docker image of the Flask app with SQL
-├── Dockerfile.jenkins          # To build the Docker image of the Jenkins server for automating pipeline
-├── Jenkinsfile                 # Contains the script for Jenkins pipeline
-├── docker-compose.yml          # Contains instructions to run Prometheus, Grafana and define their docker network
-├── entrypoint.sh               # Script to start MySQL service, activate Python venv, and run the app
-├── mysql_setup.sh              # Script to install MySQL, configure and change root password from default
-├── prometheus.yml              # Configure the parameters and scraping information for Prometheus
-├── requirements.txt            # Dependencies for the project
-├── run.py                      # Main entry point to run the Flask app
-└── schema.sql                  # SQL script for creating the database and tables
-```
+├── venv/ # Python virtual environment
+├── .env # Hidden settings (like DB password)
+├── Dockerfile # Build app image
+├── Dockerfile.jenkins # Jenkins image for CI/CD
+├── Jenkinsfile # Jenkins pipeline script
+├── docker-compose.yml # Run Grafana, Prometheus, etc.
+├── entrypoint.sh # Start MySQL + Flask
+├── mysql_setup.sh # Set up MySQL
+├── prometheus.yml # Prometheus config
+├── requirements.txt # Python packages
+├── run.py # Start the app
+└── schema.sql # Create DB tables
 
 ---
 
-# CI/CD Pipeline & Monitoring Setup
+# 🚀 CI/CD & Monitoring
 
-This section provides the step-by-step process for automating the build, deployment, logging, and monitoring of the Address Book app using Jenkins, Docker, Prometheus, and Grafana.
-
----
-
-## Prerequisites
-
-- Docker must be installed on the host machine.
-- Docker Hub credentials (to push the app image).
-- [Optional] Docker Compose if you wish to extend beyond this guide.
+Use Jenkins, Docker, Prometheus, and Grafana to build, test, and monitor the app.
 
 ---
 
-## Step-by-Step Process
+## ✅ What You Need First
 
-### 1. Build Jenkins Docker Image
+- Docker installed
+- Docker Hub login
+- (Optional) Docker Compose
 
-Create a Jenkins image with Docker and Docker Compose installed. Expose the following ports:
+---
 
-- **9090**: Prometheus
-- **3000**: Grafana
-- **8085**: Flask App
+## 🔧 Steps to Set It Up
 
-**Create `Dockerfile.jenkins`:**
+### 1. Create Jenkins Docker Image
 
-```Dockerfile
+Make a Dockerfile for Jenkins with Docker and Docker Compose inside:
+
+```dockerfile
 FROM jenkins/jenkins:lts
 USER root
 RUN apt-get update && \
@@ -81,136 +70,119 @@ RUN apt-get update && \
     apt-get install -y docker-compose
 EXPOSE 8085 3000 9090
 USER jenkins
-```
+Build the image:
 
-**Build the Docker image:**
+sh
 
-```sh
+
 docker build -t jenkins-with-docker -f Dockerfile.jenkins .
-```
+2. Run Jenkins Container
+Start Jenkins with ports open:
 
----
+sh
 
-### 2. Run the Jenkins Container
 
-Run the Docker container with Jenkins and map the required ports:
-
-```sh
 docker run -it --privileged -d --name jenkins-new \
   -p 8080:8080 -p 8085:8085 -p 3000:3000 -p 9090:9090 jenkins-with-docker
-```
+3. Let Jenkins Use Docker
+Go inside the Jenkins container and give Docker access:
 
----
+sh
 
-### 3. Grant Jenkins User Docker Access
 
-Connect to the container as root and add Jenkins user to the Docker group:
-
-```sh
 docker exec -it --user root jenkins-new bash
 usermod -aG docker jenkins
 newgrp docker
 exit
-```
+4. Restart Jenkins
+sh
 
----
 
-### 4. Restart the Jenkins Container
-
-Restart the container to apply group changes:
-
-```sh
 docker restart jenkins-new
-```
+5. Start Docker in Jenkins
+sh
 
----
 
-### 5. Start Docker Service in the Container
-
-Start Docker inside the Jenkins container:
-
-```sh
 docker exec -it --user root jenkins-new bash
 service docker start
 exit
-```
+6. Open Jenkins in Browser
+Go to: http://localhost:8080
 
----
+7. Get Jenkins Setup Password
+Use this to log in the first time:
 
-### 6. Access Jenkins UI
+sh
 
-Open Jenkins in your browser at [http://localhost:8080](http://localhost:8080).
 
----
-
-### 7. Get Jenkins Initial Admin Password
-
-Retrieve the Jenkins setup password:
-
-```sh
 docker exec jenkins-new cat /var/jenkins_home/secrets/initialAdminPassword
+8. Add DockerHub Login to Jenkins
+In Jenkins:
+
+Go to Manage Jenkins > Manage Plugins
+
+Install "Blue Ocean"
+
+Go to Manage Jenkins > Credentials
+
+Add new credential:
+
+ID: dockerhub-credentials
+
+Username: your DockerHub username
+
+Password: your DockerHub password
+
+9. Create a Jenkins Pipeline
+In Jenkins:
+
+Create new item: Addressbook
+
+Choose Pipeline
+
+Under pipeline settings:
+
+Trigger: GitHub hook
+
+Definition: Pipeline from SCM
+
+Git repo: https://github.com/faith-nte/capstone
+
+Branch: main
+
+Script path: Jenkinsfile
+
+10. Run the Pipeline
+Click "Build Now" to start the pipeline.
+
+11. Use Your App
+Flask App: http://localhost:8085
+
+Prometheus: http://localhost:9090
+
+Grafana: http://localhost:3000
+
+DockerHub: Check your uploaded image
+
+📌 Extra Info
+Webhook for GitHub
+To test webhooks locally, use ngrok:
+
+sh
+
+
+ngrok http 8085
+Use the public ngrok URL in your GitHub webhook settings.
+
+Exposed Ports Recap
+In Dockerfile.jenkins:
+
+dockerfile
+
+
+EXPOSE 8085 3000 9090
+These ports let your tools (Jenkins, Flask, Grafana, Prometheus) talk to each other.
+
+💡 Need help?
+Check the docs for Jenkins, Docker, Grafana, or Prometheus — or open an issue in the GitHub repo.
 ```
-
-Use this password in your browser to complete Jenkins setup.
-
----
-
-### 8. Set Up Jenkins DockerHub Credentials
-
-- In Jenkins: go to **Manage Jenkins > Manage Plugins**
-- Add Blue Ocean plugin to see enhanced GUI for the pipeline
-- In Jenkins: go to **Manage Jenkins > Manage Credentials**
-- Add a new credential:
-  - **ID:** `dockerhub-credentials`
-  - **Username:** Your DockerHub username
-  - **Password:** Your DockerHub password
-
----
-
-### 9. Create and Configure Jenkins Pipeline
-
-- In Jenkins, create a new build item:
-
-  - **Name:** Addressbook
-  - **Type:** Pipeline
-
-- Configure the pipeline:
-  - **Build Triggers:** GitHub hook trigger for GITScm polling
-  - **Pipeline Definition:** Pipeline script from SCM
-  - **SCM Type:** Git
-  - **Repository URL:** `https://github.com/faith-nte/capstone`
-  - **Branch Specifier:** `main`
-  - **Script Path:** `Jenkinsfile`
-
----
-
-### 10. Build the Project
-
-Click **"Build Now"** in Jenkins to trigger your pipeline.
-
----
-
-### 11. Access Your Services
-
-- **Flask App:** [http://localhost:8085](http://localhost:8085)
-- **Prometheus:** [http://localhost:9090](http://localhost:9090)
-- **Grafana:** [http://localhost:3000](http://localhost:3000)
-- **DockerHub:** Find the application image in your DockerHub repo.
-
----
-
-**For troubleshooting or more details, see the documentation for each tool or raise an issue in this repo.**
-
----
-
-//### 12. Upcoming - Expose localhost with ngrok
-
----
-
-not yet happy Happy Building!
-
-will be soon...
-
-not still....
-
-not still.
