@@ -147,6 +147,8 @@ Use this password in your browser to complete Jenkins setup.
 
 ### 8. Set Up Jenkins DockerHub Credentials
 
+- In Jenkins: go to **Manage Jenkins > Manage Plugins**
+- Add Blue Ocean plugin to see enhanced GUI for the pipeline
 - In Jenkins: go to **Manage Jenkins > Manage Credentials**
 - Add a new credential:
   - **ID:** `dockerhub-credentials`
